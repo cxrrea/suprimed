@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <br>
+    <title>Agendamentos Realizados</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Estilos para o calendário */
+        body {
+            margin: 20px; /* Adicionando margem ao corpo da página */
+            font-family: 'Arial', sans-serif;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .month-header {
+            grid-column: span 7;
+            text-align: center;
+            font-weight: bold;
+            background-color: #3498db;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px; /* Adicionando margem inferior ao cabeçalho do mês */
+        }
+
+        .day {
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: center;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+        }
+
+        .day:hover {
+            background-color: #79c4f6;
+            color: #180000;
+            cursor: pointer;
+        }
+
+        .agendamento {
+            font-weight: bold;
+            font-size: 15px;
+            width: 200px; /* Ajuste a largura conforme necessário */
+            margin: 10px auto; /* Centraliza o bloco de agendamento e adiciona margem superior/inferior */
+            padding: 8px;
+            background-color: #fff; /* Adiciona cor de fundo */
+            border: 1px solid #ddd; /* Adiciona borda */
+            border-radius: 3px; /* Adiciona borda arredondada */
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+        }
+
+        .image {
+            max-width: 100px;
+            margin-right: 20px;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="imagem1.jpg" alt="Imagem de Agendamento" class="image">
+    <h1 class="mb-4">Agendamentos Realizados</h1>
+</div>
+<br>
+<div id="calendar" class="calendar"></div>
+
+<!-- Botão para limpar os agendamentos e voltar para agendamento -->
+<div class="buttons-container">
+    <button id="limparAgendamentos" class="btn btn-danger">Limpar Agendamentos</button>
+    <a href="./agendar.html" class="btn btn-primary">Voltar para Agendamento</a>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendar = document.getElementById('calendar');
+        var agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
+
+        var monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+        // Função para limpar os agendamentos
+        document.getElementById('limparAgendamentos').addEventListener('click', function() {
+            localStorage.removeItem('agendamentos');
+            renderAgendamentos([]); // Limpa o calendário
+        });
+
+        function renderAgendamentos(agendamentos) {
+            calendar.innerHTML = '';
+
+            // Organizar os agendamentos em um objeto por mês e ano
+            var agendamentosPorMesAno = {};
+
+            agendamentos.forEach(function(agendamento) {
+                var dados = agendamento.split(", ");
+                var nome = dados[0].split(": ")[1];
+                var data = new Date(dados[1].split(": ")[1]);
+                var mesAno = data.getFullYear() + "-" + (data.getMonth() + 1); // Formato: "Ano-Mês"
+
+                if (!agendamentosPorMesAno[mesAno]) {
+                    agendamentosPorMesAno[mesAno] = [];
+                }
+
+                agendamentosPorMesAno[mesAno].push(agendamento);
+            });
+
+            for (var mesAno in agendamentosPorMesAno) {
+                var agendamentosDoMes = agendamentosPorMesAno[mesAno];
+
+                var mesAnoSplit = mesAno.split("-");
+                var mes = parseInt(mesAnoSplit[1]) - 1;
+
+                var monthHeader = document.createElement('div');
+                monthHeader.className = 'month-header';
+                monthHeader.textContent = monthNames[mes] + " " + mesAnoSplit[0];
+
+                calendar.appendChild(monthHeader);
+
+                agendamentosDoMes.forEach(function(agendamento) {
+                    var dados = agendamento.split(", ");
+                    var nome = dados[0].split(": ")[1];
+                    var data = new Date(dados[1].split(": ")[1]);
+                    var aula = dados[2].split(": ")[1];
+                    var instrutor = dados[3].split(": ")[1];
+
+                    var dia = data.getDate();
+
+                    var dayElement = document.createElement('div');
+                    dayElement.className = 'day';
+                    dayElement.innerHTML = `<div class="agendamento">${nome}</div><div>${data.toLocaleDateString()} ${aula} - Instrutor: ${instrutor}</div>`;
+
+                    calendar.appendChild(dayElement);
+                });
+            }
+        }
+
+        renderAgendamentos(agendamentos);
+    });
+</script>
+
+</body>
+</html>
